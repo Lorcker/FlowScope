@@ -21,7 +21,7 @@ uint8_t* hmapk{key_size}v{value_size}_accessor_get_value(hmapk{key_size}v{value_
 local module = {}
 
 local keySizes = { 8, 16, 32, 64 }
-local valueSizes = { 8, 16, 32, 64, 128 }
+local valueSizes = { 8, 16, 32, 64, 128, 416, 432, 15000, 20000, 30000, 40000, 52000, 60000, 70000, 80000, 90000, 100000, 110000, 120000, 130000, 140000, 150000, 160000 }
 
 -- Get tbb hash map with fitting key and value size
 function module.createHashmap(keySize, valueSize)
@@ -48,6 +48,42 @@ function module.createHashmap(keySize, valueSize)
         realValueSize = 64
     elseif valueSize <= 128 then
         realValueSize = 128
+    elseif valueSize <= 416 then
+       realValueSize = 416
+    elseif valueSize <= 432 then
+       realValueSize = 432
+    elseif valueSize <= 15000 then
+       realValueSize = 15000
+    elseif valueSize <= 20000 then
+       realValueSize = 20000
+    elseif valueSize <= 30000 then
+       realValueSize = 30000
+    elseif valueSize <= 40000 then
+       realValueSize = 40000
+    elseif valueSize <= 52000 then
+       realValueSize = 52000
+    elseif valueSize <= 60000 then
+       realValueSize = 60000
+    elseif valueSize <= 70000 then
+       realValueSize = 70000
+    elseif valueSize <= 80000 then
+       realValueSize = 80000
+    elseif valueSize <= 90000 then
+       realValueSize = 90000
+    elseif valueSize <= 100000 then
+       realValueSize = 10000
+    elseif valueSize <= 110000 then
+       realValueSize = 110000
+    elseif valueSize <= 120000 then
+       realValueSize = 120000
+    elseif valueSize <= 130000 then
+       realValueSize = 130000
+    elseif valueSize <= 140000 then
+       realValueSize = 140000
+    elseif valueSize <= 150000 then
+       realValueSize = 150000
+    elseif valueSize <= 160000 then
+       realValueSize = 160000
     else
         log:error("Values of size %d are not supported", valueSize)
         return nil
