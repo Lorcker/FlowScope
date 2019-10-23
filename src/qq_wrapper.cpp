@@ -34,7 +34,7 @@ namespace QQ {
 				while (!enq_ptr.store(
 					timestamp_batch,
 					// vlan
-					bufs[i]->ol_flags & PKT_RX_VLAN_PKT ? bufs[i]->vlan_tci & 0xFFF : 0,
+					bufs[i]->ol_flags & PKT_RX_VLAN ? bufs[i]->vlan_tci & 0xFFF : 0,
 					rte_pktmbuf_pkt_len(bufs[i]),              // packet length
 					rte_pktmbuf_mtod(bufs[i], const uint8_t*)  // packet data
 				)) {
