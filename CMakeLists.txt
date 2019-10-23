@@ -15,7 +15,7 @@ SET(LIBMOON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libmoon)
 
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/src
-	${LIBMOON_DIR}/deps/dpdk/x86_64-native-linuxapp-gcc/include
+	${LIBMOON_DIR}/deps/dpdk/x86_64-native-linux-gcc/include
 	${LIBMOON_DIR}/deps/luajit/src
 	${LIBMOON_DIR}/lib
 	${LIBMOON_DIR}/src
