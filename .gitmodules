@@ -1,6 +1,6 @@
 [submodule "libmoon"]
 	path = libmoon
-	url = https://github.com/libmoon/libmoon
+	url = https://github.com/WiednerF/libmoon
 	shallow = true
 [submodule "tbb"]
 	path = tbb
