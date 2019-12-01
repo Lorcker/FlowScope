@@ -8,14 +8,6 @@ local qq = require "qq"
 local jit = require "jit"
 jit.opt.start("maxrecord=20000", "maxirconst=20000", "loopunroll=4000")
 
----Defining Static HashKey
-ffi.cdef[[
-    struct hash {
-        static const uint8_t length = 40;
-        static uint8_t hash_key[40] = { 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, };
-    }
-]]
-
 function configure(parser)
     parser:argument("module", "Path to user-defined analysis module")
     parser:argument("dev", "Devices to use."):args("+"):convert(tonumber)
@@ -46,12 +38,9 @@ function master(args)
     userModule.logLevel = args.logLevel
     local tracker = flowtracker.new(userModule)
 
-    local hashKey = nil
-    local hashKeyLength = 0
+    local enableRSSSymm = false
     if userModule["useSymmetricalRSS"]~=nil and userModule.useSymmetricalRSS == true then---To switch between symmetrical and none symmetrical RSS Hash Key
-        local hash = ffi.new("struct hash")---Creating the Struct
-        hashKeyLength = hash.length---Using the values further
-        hashKey = hash.hash_key---Using the values further
+        enableRSSSymm = true
     end
     -- this part should be wrapped by flowscope and exposed via CLI arguments
     for i, dev in ipairs(args.dev) do
@@ -59,8 +48,7 @@ function master(args)
             port = dev,
             rxQueues = args.rxThreads,
             rssQueues = args.rxThreads,
-            rssHashKey = hashKey,---Required in order to set a new Hash Key
-            rssHashKeyLen = hashKeyLength
+            enable_rss_symm = enableRSSSymm---In order to use a symmetric Hash
         }
         -- Create analyzers
         for threadId = 0, args.rxThreads - 1 do
