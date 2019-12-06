@@ -242,7 +242,7 @@ function flowtracker:analyzerQQ(userModule, queue, flowPipe, threadId)
                             flowPipe:send(info)
                         end
                     end
-                    if handler(flowKey, valuePtr, buf, isNew) then
+                    if handler(flowKey, valuePtr, buf, isNew, threadId) then
                         local event = ev.newEvent(buildPacketFilter(flowKey), ev.create)
                         log:debug("[Analyzer]: Handler requested dump of flow %s", flowKey)
                         for _, pipe in ipairs(self.filterPipes) do
