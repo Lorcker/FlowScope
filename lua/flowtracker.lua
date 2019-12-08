@@ -315,7 +315,7 @@ function flowtracker:checker(userModule,threadId)
                 assert(isNew == false) -- Must hold or we have an error
                 local valuePtr = ffi.cast(stateType, accs[index]:get())
                 local flowKey = ffi.cast(userModule.flowKeys[index] .. "*", keyBuf)
-                local expired, ts = userModule.checkExpiry(flowKey, valuePtr, checkState)
+                local expired, ts = userModule.checkExpiry(flowKey, valuePtr, checkState, threadId)
                 if expired then
                     assert(ts)
                     self.maps[index]:erase(accs[index])
