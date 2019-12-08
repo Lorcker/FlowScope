@@ -101,8 +101,8 @@ end
 
 -- Starts the flow expiry checker
 -- Must only be called after all analyzers are set up
-function flowtracker:startChecker(userModule)
-    lm.startTask("__FLOWTRACKER_CHECKER", self, userModule)
+function flowtracker:startChecker(userModule, p)
+    lm.startTask("__FLOWTRACKER_CHECKER", self, userModule, p)
 end
 
 -- Starts a new dumper
