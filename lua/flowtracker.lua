@@ -101,8 +101,8 @@ end
 
 -- Starts the flow expiry checker
 -- Must only be called after all analyzers are set up
-function flowtracker:startChecker(userModule)
-    lm.startTask("__FLOWTRACKER_CHECKER", self, userModule)
+function flowtracker:startChecker(userModule, p)
+    lm.startTask("__FLOWTRACKER_CHECKER", self, userModule, p)
 end
 
 -- Starts a new dumper
@@ -263,7 +263,7 @@ function flowtracker:analyzerQQ(userModule, queue, flowPipe, threadId)
     rxCtr:finalize()
 end
 
-function flowtracker:checker(userModule)
+function flowtracker:checker(userModule,threadId)
     userModule = loadfile(userModule)()
     if not userModule.checkInterval then
         log:info("[Checker]: Disabled by user module")
@@ -294,16 +294,15 @@ function flowtracker:checker(userModule)
 
 --     require("jit.p").start("a")
     while lm.running(self.shutdownDelay) do
-        for _, pipe in ipairs(self.pipes) do
-            local newFlow = pipe:tryRecv(10)
-            if newFlow ~= nil then
-                newFlow = ffi.cast("struct new_flow_info&", newFlow)
-                --print("checker", newFlow)
-                addToList(flows, newFlow)
-            end
+        local pipeLocal = self.pipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
+        local newFlow = pipeLocal:tryRecv(10)
+        if newFlow ~= nil then
+            newFlow = ffi.cast("struct new_flow_info&", newFlow)
+            --print("checker", newFlow)
+            addToList(flows, newFlow)
         end
         if checkTimer:expired() then
-            log:info("[Checker]: Started")
+            log:info("[Checker "..threadId.."]: Started")
             checkTimer:reset() -- Reseting the timer first makes the checker self-clocking
 --             require("jit.p").start("a")
             local t1 = time()
@@ -321,9 +320,8 @@ function flowtracker:checker(userModule)
                     assert(ts)
                     self.maps[index]:erase(accs[index])
                     local event = ev.newEvent(buildPacketFilter(flowKey), ev.delete, nil, ts)
-                    for _, pipe in ipairs(self.filterPipes) do
-                        pipe:send(event)
-                    end
+                    local pipeFiltered = self.filterPipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
+                    pipeFiltered:send(event)---Assuming the Flow comes from the same Core and this results into the same Filter as it will be always matched there
                     deleteFlow(flows[i])
                     purged = purged + 1
                 else
@@ -335,7 +333,7 @@ function flowtracker:checker(userModule)
             flows = keepList
             finalizer(checkState, keep, purged)
             local t2 = time()
-            log:info("[Checker]: Done, took %fs, flows %i/%i/%i [purged/kept/total]", t2 - t1, purged, keep, purged+keep)
+            log:info("[Checker "..threadId.."]: Done, took %fs, flows %i/%i/%i [purged/kept/total]", t2 - t1, purged, keep, purged+keep)
 --             require("jit.p").stop()
         end
     end
