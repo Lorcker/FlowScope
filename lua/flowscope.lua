@@ -64,7 +64,9 @@ function master(args)
             end
         end
         -- Start checker, has to done after the analyzers/pipes are created
-        tracker:startChecker(args.module)
+        for threadId = 0, args.rxThreads - 1 do---In order to enable multiple Checker (Same number as then number of Analyzer Threads)
+            tracker:startChecker(args.module,threadId)---Requires ThreadId
+        end
     end
     device.waitForLinks()
     -- end wrapped part
