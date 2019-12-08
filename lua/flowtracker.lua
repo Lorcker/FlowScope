@@ -302,7 +302,7 @@ function flowtracker:checker(userModule,threadId)
             addToList(flows, newFlow)
         end
         if checkTimer:expired() then
-            log:info("[Checker]: Started")
+            log:info("[Checker "..threadId.."]: Started")
             checkTimer:reset() -- Reseting the timer first makes the checker self-clocking
 --             require("jit.p").start("a")
             local t1 = time()
@@ -333,7 +333,7 @@ function flowtracker:checker(userModule,threadId)
             flows = keepList
             finalizer(checkState, keep, purged)
             local t2 = time()
-            log:info("[Checker]: Done, took %fs, flows %i/%i/%i [purged/kept/total]", t2 - t1, purged, keep, purged+keep)
+            log:info("[Checker "..threadId.."]: Done, took %fs, flows %i/%i/%i [purged/kept/total]", t2 - t1, purged, keep, purged+keep)
 --             require("jit.p").stop()
         end
     end
