@@ -275,6 +275,8 @@ function flowtracker:checker(userModule,threadId)
     local finalizer = userModule.checkFinalizer or function() end
     local buildPacketFilter = userModule.buildPacketFilter or function() end
     local checkState = userModule.checkState or {}
+    local pipeLocal = self.pipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
+    local newFlow
 
     -- Flow list
     local flows = {}
@@ -294,8 +296,7 @@ function flowtracker:checker(userModule,threadId)
 
 --     require("jit.p").start("a")
     while lm.running(self.shutdownDelay) do
-        local pipeLocal = self.pipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
-        local newFlow = pipeLocal:tryRecv(10)
+        newFlow = pipeLocal:tryRecv(10)
         if newFlow ~= nil then
             newFlow = ffi.cast("struct new_flow_info&", newFlow)
             --print("checker", newFlow)
@@ -310,6 +311,12 @@ function flowtracker:checker(userModule,threadId)
             local keepList = {}
             initializer(checkState)
             for i = #flows, 1, -1 do
+                newFlow = pipeLocal:tryRecv(1)---Perform Adding of new Flows between as well
+                if newFlow ~= nil then
+                    newFlow = ffi.cast("struct new_flow_info&", newFlow)
+                    --print("checker", newFlow)
+                    addToList(flows, newFlow)
+                end
                 local index, keyBuf = flows[i].index, flows[i].flow_key
                 local isNew = self.maps[index]:access(accs[index], keyBuf)
                 assert(isNew == false) -- Must hold or we have an error
@@ -320,8 +327,9 @@ function flowtracker:checker(userModule,threadId)
                     assert(ts)
                     self.maps[index]:erase(accs[index])
                     local event = ev.newEvent(buildPacketFilter(flowKey), ev.delete, nil, ts)
-                    local pipeFiltered = self.filterPipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
-                    pipeFiltered:send(event)---Assuming the Flow comes from the same Core and this results into the same Filter as it will be always matched there
+                    for _, pipe in ipairs(self.filterPipes) do
+                        pipe:send(event)---Assuming the Flow comes from the same Core and this results into the same Filter as it will be always matched there
+                    end
                     deleteFlow(flows[i])
                     purged = purged + 1
                 else
