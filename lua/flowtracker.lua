@@ -296,11 +296,17 @@ function flowtracker:checker(userModule,threadId)
 
 --     require("jit.p").start("a")
     while lm.running(self.shutdownDelay) do
-        newFlow = pipeLocal:tryRecv(10)
-        if newFlow ~= nil then
-            newFlow = ffi.cast("struct new_flow_info&", newFlow)
-            --print("checker", newFlow)
-            addToList(flows, newFlow)
+        local count = pipeLocal:count()
+        if count > 0 then
+            for i=count, 1,-1 do---Receive all new Flows and add them to the list of new flows
+                newFlow = nil
+                newFlow = pipeLocal:tryRecv(1)
+                if newFlow ~= nil then
+                    newFlow = ffi.cast("struct new_flow_info&", newFlow)
+                    --print("checker", newFlow)
+                    addToList(flows, newFlow)
+                end
+            end
         end
         if checkTimer:expired() then
             log:info("[Checker "..threadId.."]: Started")
@@ -311,12 +317,6 @@ function flowtracker:checker(userModule,threadId)
             local keepList = {}
             initializer(checkState)
             for i = #flows, 1, -1 do
-                newFlow = pipeLocal:tryRecv(1)---Perform Adding of new Flows between as well
-                if newFlow ~= nil then
-                    newFlow = ffi.cast("struct new_flow_info&", newFlow)
-                    --print("checker", newFlow)
-                    addToList(flows, newFlow)
-                end
                 local index, keyBuf = flows[i].index, flows[i].flow_key
                 local isNew = self.maps[index]:access(accs[index], keyBuf)
                 assert(isNew == false) -- Must hold or we have an error
