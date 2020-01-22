@@ -276,6 +276,7 @@ function flowtracker:checker(userModule,threadId)
     local buildPacketFilter = userModule.buildPacketFilter or function() end
     local checkState = userModule.checkState or {}
     local pipeLocal = self.pipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
+    local pipeDump = self.filterPipes[threadId+1]---Assuming it starts with 1 as index and threadId with 0
     local newFlow
 
     -- Flow list
@@ -327,9 +328,8 @@ function flowtracker:checker(userModule,threadId)
                     assert(ts)
                     self.maps[index]:erase(accs[index])
                     local event = ev.newEvent(buildPacketFilter(flowKey), ev.delete, nil, ts)
-                    for _, pipe in ipairs(self.filterPipes) do
-                        pipe:send(event)---Assuming the Flow comes from the same Core and this results into the same Filter as it will be always matched there
-                    end
+                    pipeDump:send(event)---Assuming the Flow comes from the same Core and this results into the same Filter as it will be always matched there
+                    -- TODO Testing if it is much faster
                     deleteFlow(flows[i])
                     purged = purged + 1
                 else
