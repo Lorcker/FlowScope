@@ -329,7 +329,6 @@ function flowtracker:checker(userModule,threadId)
                     self.maps[index]:erase(accs[index])
                     local event = ev.newEvent(buildPacketFilter(flowKey), ev.delete, nil, ts)
                     pipeDump:send(event)---Assuming the Flow comes from the same Core and this results into the same Filter as it will be always matched there
-                    -- TODO Testing if it is much faster
                     deleteFlow(flows[i])
                     purged = purged + 1
                 else
