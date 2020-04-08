@@ -5,6 +5,11 @@ Triggers can be packets matching a user-defined filter.
 
 Our [older publication](https://www.net.in.tum.de/fileadmin/bibtex/publications/papers/FlowScope.pdf) (IFIP Networking 2017, [BibTeX](https://www.net.in.tum.de/publications/bibtex/FlowScope17.bib)) focuses on our QQ data structure used for time-traveling network debugging.
 
+# Addings compared to the Original Version
+* Support for systems with more than 127 cores
+* Parallelization of the checkExpiry function
+* Symmetrical hash key for RSS supporting bidirectional flows in parallel processing
+* Bigger hash structure to save the flow status information
 
 # Architecture
 
